@@ -162,7 +162,8 @@ app.append(captureDrawer);
 
 void listEntries()
   .then((entries) => {
-    for (const entry of entries) capturedLayer.append(createCapturedEntry(entry));
+    for (const entry of entries)
+      capturedLayer.append(createCapturedEntry(entry));
   })
   .catch(() => undefined);
 
