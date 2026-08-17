@@ -30,9 +30,6 @@ jobs:
       - name: Test
         run: npm test
 
-      - name: Format portrait preview
-        run: npx prettier src/art/typographicPortrait.ts
-
       - name: Format check
         run: npm run format
 
