@@ -48,11 +48,7 @@ export function createTypographicPortrait(): SVGGElement {
     "portrait-head",
     "M -50 -500 C -330 -520 -500 -330 -470 -70 C -450 110 -350 245 -235 325 C -150 385 -118 475 -105 570 C 20 520 122 435 160 315 C 200 200 238 125 330 52 C 388 5 385 -72 330 -102 C 286 -125 268 -160 285 -208 C 325 -320 210 -468 -50 -500 Z",
   );
-  addPath(
-    defs,
-    "portrait-brow",
-    "M -255 -150 C -170 -210 -45 -205 48 -153",
-  );
+  addPath(defs, "portrait-brow", "M -255 -150 C -170 -210 -45 -205 48 -153");
   addPath(
     defs,
     "portrait-eye",
