@@ -11,15 +11,23 @@ describe("presenceForSource", () => {
   });
 
   it("gets more present as the visitor zooms in", () => {
-    const distantZoom = presenceForSource({ x: 900, y: -300, scale: 0.2 }, source);
-    const closeZoom = presenceForSource({ x: 900, y: -300, scale: 1.2 }, source);
+    const distantZoom = presenceForSource(
+      { x: 900, y: -300, scale: 0.2 },
+      source,
+    );
+    const closeZoom = presenceForSource(
+      { x: 900, y: -300, scale: 1.2 },
+      source,
+    );
     expect(closeZoom).toBeGreaterThan(distantZoom);
   });
 });
 
 describe("panForSource", () => {
   it("places a source to the right when it is east of the camera", () => {
-    expect(panForSource({ x: 0, y: 0, scale: 1 }, source)).toBeGreaterThan(0);
+    expect(panForSource({ x: 0, y: 0, scale: 1 }, source)).toBeGreaterThan(
+      0,
+    );
   });
 
   it("clamps stereo position", () => {
