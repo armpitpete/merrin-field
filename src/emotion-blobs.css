@@ -7,7 +7,7 @@
   border-radius: 46% 54% 51% 49% / 58% 45% 55% 42%;
   background: color-mix(in srgb, var(--emotion-colour) 58%, #eee8dc 42%);
   color: rgb(23 22 20 / 78%);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--emotion-colour) 24%, transparent);
+  box-shadow: inset 0 0 0 1px rgb(23 22 20 / 7%);
   line-height: 1;
   transition:
     background 160ms ease,
@@ -37,18 +37,14 @@
 .emotion-chip:hover,
 .emotion-chip:focus-within {
   background: color-mix(in srgb, var(--emotion-colour) 70%, #eee8dc 30%);
-  box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--emotion-colour) 34%, transparent),
-    0 2px 7px rgb(23 22 20 / 8%);
+  box-shadow: 0 2px 7px rgb(23 22 20 / 8%);
 }
 
 .emotion-chip:has(input:checked) {
   border-color: transparent;
   background: color-mix(in srgb, var(--emotion-colour) 88%, #eee8dc 12%);
   color: rgb(23 22 20 / 88%);
-  box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--emotion-colour) 50%, rgb(23 22 20 / 18%)),
-    0 3px 9px rgb(23 22 20 / 10%);
+  box-shadow: 0 3px 9px rgb(23 22 20 / 10%);
 }
 
 .emotion-chip:has(input:checked):nth-of-type(3n + 1) {
