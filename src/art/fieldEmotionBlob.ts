@@ -19,9 +19,10 @@ export function emotionBlobPlacement(index: number): EmotionBlobPlacement {
   const row = Math.floor(index / 3);
   const xOffsets = [12, 178, 342] as const;
   const rowNudge = row % 2 === 0 ? 0 : 28;
+  const x = xOffsets[column] ?? xOffsets[0];
 
   return {
-    x: xOffsets[column] + rowNudge,
+    x: x + rowNudge,
     y: 112 + row * 152 + (column === 1 ? 8 : column === 2 ? -5 : 0),
     rotate: [-4, 3, -1][index % 3] ?? 0,
   };
@@ -53,7 +54,7 @@ export function createFieldEmotionBlob(
 
   const scale = svgElement("g", { class: "field-emotion-blob-scale" });
   const shape = svgElement("path", {
-    d: BLOB_PATHS[index % BLOB_PATHS.length],
+    d: BLOB_PATHS[index % BLOB_PATHS.length] ?? BLOB_PATHS[0],
     class: "field-emotion-blob-shape",
   });
   const label = svgElement("text", {
