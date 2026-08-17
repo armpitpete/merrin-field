@@ -2,7 +2,7 @@ import "./style.css";
 import "./emotion-blobs.css";
 import { createCapturedEntry } from "./art/capturedEntry";
 import { createLiveTrace } from "./art/liveTrace";
-import { listEntries, saveEntry } from "./field/store";
+import { deleteEntry, listEntries, saveEntry } from "./field/store";
 import { createCaptureDrawer } from "./ui/captureDrawer";
 import {
   cameraTransform,
@@ -13,6 +13,7 @@ import {
 } from "./world/camera";
 import { createSpatialSound } from "./world/spatialSound";
 import { applyZoomVisibility } from "./world/zoomVisibility";
+import type { FieldEntry } from "./field/entry";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 const EMOTION_BLOB_BASE_SCALE = 0.55;
@@ -145,6 +146,7 @@ world.append(soundAnchor);
 // current position and media behaviour are only today's interpretation.
 const capturedLayer = svgElement("g", { class: "captured-layer" });
 world.append(capturedLayer);
+const capturedElements = new Map<string, SVGGElement>();
 
 // Peripheral real material replaces the generic "there is more out here" cue.
 addText(world, "Lina controlled recolour", 4300, -2550, "far-mark", {
@@ -154,18 +156,35 @@ addText(world, "Lina controlled recolour", 4300, -2550, "far-mark", {
 svg.append(world);
 app.append(svg);
 
+function mountCapturedEntry(entry: FieldEntry): void {
+  capturedElements.get(entry.id)?.remove();
+  const element = createCapturedEntry(entry, {
+    onEdit: (editable) => captureDrawer.openForEdit(editable),
+  });
+  capturedElements.set(entry.id, element);
+  capturedLayer.append(element);
+}
+
 const captureDrawer = createCaptureDrawer({
   onCreate: async (entry) => {
     await saveEntry(entry);
-    capturedLayer.append(createCapturedEntry(entry));
+    mountCapturedEntry(entry);
+  },
+  onUpdate: async (entry) => {
+    await saveEntry(entry);
+    mountCapturedEntry(entry);
+  },
+  onDelete: async (entry) => {
+    await deleteEntry(entry.id);
+    capturedElements.get(entry.id)?.remove();
+    capturedElements.delete(entry.id);
   },
 });
-app.append(captureDrawer);
+app.append(captureDrawer.element);
 
 void listEntries()
   .then((entries) => {
-    for (const entry of entries)
-      capturedLayer.append(createCapturedEntry(entry));
+    for (const entry of entries) mountCapturedEntry(entry);
   })
   .catch(() => undefined);
 

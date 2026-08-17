@@ -35,6 +35,20 @@ export async function saveEntry(entry: FieldEntry): Promise<void> {
   database.close();
 }
 
+export async function deleteEntry(id: string): Promise<void> {
+  const database = await openDatabase();
+  await new Promise<void>((resolve, reject) => {
+    const transaction = database.transaction(ENTRY_STORE, "readwrite");
+    transaction.objectStore(ENTRY_STORE).delete(id);
+    transaction.oncomplete = () => resolve();
+    transaction.onerror = () =>
+      reject(transaction.error ?? new Error("Could not delete entry"));
+    transaction.onabort = () =>
+      reject(transaction.error ?? new Error("Deleting entry was aborted"));
+  });
+  database.close();
+}
+
 export async function listEntries(): Promise<FieldEntry[]> {
   const database = await openDatabase();
   const entries = await new Promise<FieldEntry[]>((resolve, reject) => {

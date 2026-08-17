@@ -8,6 +8,14 @@ import {
 
 export type CaptureDrawerOptions = {
   onCreate: (entry: FieldEntry) => Promise<void>;
+  onUpdate: (entry: FieldEntry) => Promise<void>;
+  onDelete: (entry: FieldEntry) => Promise<void>;
+};
+
+export type CaptureDrawerController = {
+  element: HTMLElement;
+  openForCreate: () => void;
+  openForEdit: (entry: FieldEntry) => void;
 };
 
 function localDateTimeValue(date: Date): string {
@@ -36,7 +44,7 @@ function mediaFromFile(file: File): StoredMedia {
 
 export function createCaptureDrawer(
   options: CaptureDrawerOptions,
-): HTMLElement {
+): CaptureDrawerController {
   const shell = document.createElement("div");
   shell.className = "capture-shell";
 
@@ -49,7 +57,7 @@ export function createCaptureDrawer(
 
   const drawer = document.createElement("aside");
   drawer.className = "capture-drawer";
-  drawer.setAttribute("aria-label", "Add something to Merrin Field");
+  drawer.setAttribute("aria-label", "Add or edit something in Merrin Field");
 
   const header = document.createElement("div");
   header.className = "capture-header";
@@ -78,6 +86,10 @@ export function createCaptureDrawer(
   media.type = "file";
   media.multiple = true;
   media.accept = "image/*,video/*,audio/*,.pdf";
+
+  const existingMedia = document.createElement("div");
+  existingMedia.className = "capture-existing-media";
+  existingMedia.hidden = true;
 
   const mediaNote = document.createElement("div");
   mediaNote.className = "capture-media-note";
@@ -170,15 +182,27 @@ export function createCaptureDrawer(
   save.className = "capture-save";
   save.textContent = "add to field";
 
+  const deleteArea = document.createElement("div");
+  deleteArea.className = "capture-delete-area";
+  deleteArea.hidden = true;
+  const deleteButton = document.createElement("button");
+  deleteButton.type = "button";
+  deleteButton.className = "capture-delete";
+  deleteButton.textContent = "delete record";
+  const deleteNotice = document.createElement("span");
+  deleteNotice.className = "capture-delete-notice";
+  deleteArea.append(deleteButton, deleteNotice);
+
   const persistenceNote = document.createElement("p");
   persistenceNote.className = "capture-persistence-note";
   persistenceNote.textContent =
-    "M0.2 stores captures and uploads in this browser. Cross-device publishing is the next persistence gate.";
+    "Records and uploads are stored in this browser. Editing or deleting changes that browser copy immediately.";
 
   form.append(
     createLabel("when", happenedAt),
     createLabel("text", text),
-    createLabel("upload", media),
+    createLabel("upload more", media),
+    existingMedia,
     mediaNote,
     recordRow,
     createLabel("place", place),
@@ -189,16 +213,118 @@ export function createCaptureDrawer(
     createLabel("visibility", visibility),
     pinLabel,
     save,
+    deleteArea,
     persistenceNote,
   );
 
   drawer.append(header, form);
   shell.append(toggle, drawer);
 
+  let editingEntry: FieldEntry | null = null;
+  let deleteArmed = false;
   let recording: MediaRecorder | null = null;
   let recordingStream: MediaStream | null = null;
   let recordedChunks: Blob[] = [];
   const recordedMedia: StoredMedia[] = [];
+  const existingMediaKeep = new Map<string, HTMLInputElement>();
+
+  function setOpen(open: boolean): void {
+    shell.classList.toggle("is-open", open);
+    toggle.setAttribute("aria-expanded", String(open));
+    if (open) text.focus();
+  }
+
+  function resetDeleteArm(): void {
+    deleteArmed = false;
+    deleteButton.textContent = "delete record";
+    deleteNotice.textContent = "";
+  }
+
+  function resetRecordingState(): void {
+    recordedMedia.length = 0;
+    recordState.textContent = "";
+    record.textContent = "record sound now";
+  }
+
+  function renderExistingMedia(entry: FieldEntry | null): void {
+    existingMedia.replaceChildren();
+    existingMediaKeep.clear();
+    if (!entry || entry.media.length === 0) {
+      existingMedia.hidden = true;
+      return;
+    }
+
+    existingMedia.hidden = false;
+    const heading = document.createElement("span");
+    heading.className = "capture-field-name";
+    heading.textContent = "existing media";
+    existingMedia.append(heading);
+
+    for (const asset of entry.media) {
+      const label = document.createElement("label");
+      label.className = "capture-existing-media-item";
+      const keep = document.createElement("input");
+      keep.type = "checkbox";
+      keep.checked = true;
+      existingMediaKeep.set(asset.id, keep);
+      label.append(keep, document.createTextNode(` keep ${asset.name}`));
+      existingMedia.append(label);
+    }
+  }
+
+  function clearForm(): void {
+    editingEntry = null;
+    happenedAt.value = localDateTimeValue(new Date());
+    text.value = "";
+    media.value = "";
+    place.value = "";
+    whyNow.value = "";
+    relationships.value = "";
+    importance.value = "60";
+    visibility.value = "private";
+    pinned.checked = false;
+    for (const input of emotionInputs.values()) input.checked = false;
+    renderExistingMedia(null);
+    resetRecordingState();
+    resetDeleteArm();
+    title.textContent = "add something";
+    save.textContent = "add to field";
+    save.disabled = false;
+    deleteArea.hidden = true;
+  }
+
+  function loadEntry(entry: FieldEntry): void {
+    editingEntry = entry;
+    happenedAt.value = localDateTimeValue(new Date(entry.happenedAt));
+    text.value = entry.text;
+    media.value = "";
+    place.value = entry.place;
+    whyNow.value = entry.whyNow;
+    relationships.value = entry.relationships.join(", ");
+    importance.value = String(entry.importance);
+    visibility.value = entry.visibility;
+    pinned.checked = entry.pinned;
+    for (const [emotion, input] of emotionInputs) {
+      input.checked = entry.emotions.includes(emotion);
+    }
+    renderExistingMedia(entry);
+    resetRecordingState();
+    resetDeleteArm();
+    title.textContent = "edit record";
+    save.textContent = "save changes";
+    save.disabled = false;
+    deleteArea.hidden = false;
+  }
+
+  function openForCreate(): void {
+    clearForm();
+    setOpen(true);
+  }
+
+  function openForEdit(entry: FieldEntry): void {
+    loadEntry(entry);
+    setOpen(true);
+  }
 
   async function stopRecording(): Promise<void> {
     if (!recording || recording.state === "inactive") return;
@@ -252,15 +378,13 @@ export function createCaptureDrawer(
       });
   });
 
-  function setOpen(open: boolean): void {
-    shell.classList.toggle("is-open", open);
-    toggle.setAttribute("aria-expanded", String(open));
-    if (open) text.focus();
-  }
-
-  toggle.addEventListener("click", () =>
-    setOpen(!shell.classList.contains("is-open")),
-  );
+  toggle.addEventListener("click", () => {
+    if (shell.classList.contains("is-open")) {
+      setOpen(false);
+    } else {
+      openForCreate();
+    }
+  });
   close.addEventListener("click", () => setOpen(false));
 
   window.addEventListener("keydown", (event) => {
@@ -268,9 +392,43 @@ export function createCaptureDrawer(
     const target = event.target;
     const typing =
       target instanceof HTMLInputElement ||
-      target instanceof HTMLTextAreaElement;
-    if (!typing && event.key.toLowerCase() === "c") setOpen(true);
+      target instanceof HTMLTextAreaElement ||
+      target instanceof HTMLSelectElement;
+    if (!typing && event.key.toLowerCase() === "c") openForCreate();
   });
+
+  deleteButton.addEventListener("click", () => {
+    if (!editingEntry) return;
+    if (!deleteArmed) {
+      deleteArmed = true;
+      deleteButton.textContent = "delete permanently";
+      const preview =
+        editingEntry.text.trim().slice(0, 48) || "untitled record";
+      deleteNotice.textContent = `Will remove “${preview}${editingEntry.text.length > 48 ? "…" : ""}” from this browser.`;
+      return;
+    }
+
+    deleteButton.disabled = true;
+    deleteButton.textContent = "deleting…";
+    const entry = editingEntry;
+    void options
+      .onDelete(entry)
+      .then(() => {
+        setOpen(false);
+        clearForm();
+        deleteButton.disabled = false;
+      })
+      .catch(() => {
+        deleteButton.disabled = false;
+        deleteButton.textContent = "try delete again";
+        deleteNotice.textContent =
+          "Delete failed; the record is still present.";
+        deleteArmed = true;
+      });
+  });
+
+  form.addEventListener("input", () => resetDeleteArm());
+  form.addEventListener("change", () => resetDeleteArm());
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -281,13 +439,20 @@ export function createCaptureDrawer(
     const selectedEmotions = Array.from(emotionInputs.entries())
       .filter(([, input]) => input.checked)
       .map(([emotion]) => emotion);
+    const keptExistingMedia = editingEntry
+      ? editingEntry.media.filter(
+          (asset) => existingMediaKeep.get(asset.id)?.checked !== false,
+        )
+      : [];
+    const now = new Date().toISOString();
 
     const entry: FieldEntry = {
-      id: crypto.randomUUID(),
-      createdAt: new Date().toISOString(),
+      id: editingEntry?.id ?? crypto.randomUUID(),
+      createdAt: editingEntry?.createdAt ?? now,
+      updatedAt: editingEntry ? now : undefined,
       happenedAt: Number.isFinite(happenedDate.getTime())
         ? happenedDate.toISOString()
-        : new Date().toISOString(),
+        : now,
       text: text.value.trim(),
       whyNow: whyNow.value.trim(),
       place: place.value.trim(),
@@ -299,7 +464,7 @@ export function createCaptureDrawer(
         .filter(Boolean),
       visibility: visibility.value as EntryVisibility,
       emotions: selectedEmotions,
-      media: [...selectedFiles, ...recordedMedia],
+      media: [...keptExistingMedia, ...selectedFiles, ...recordedMedia],
     };
 
     if (!entry.text && entry.media.length === 0) {
@@ -307,24 +472,17 @@ export function createCaptureDrawer(
       return;
     }
 
+    const updating = Boolean(editingEntry);
     save.disabled = true;
-    save.textContent = "adding…";
-    void options
-      .onCreate(entry)
+    save.textContent = updating ? "saving…" : "adding…";
+    const action = updating ? options.onUpdate(entry) : options.onCreate(entry);
+    void action
       .then(() => {
-        text.value = "";
-        whyNow.value = "";
-        media.value = "";
-        recordedMedia.length = 0;
-        recordState.textContent = "";
-        record.textContent = "record sound now";
-        happenedAt.value = localDateTimeValue(new Date());
-        save.textContent = "added";
+        save.textContent = updating ? "saved" : "added";
         window.setTimeout(() => {
-          save.textContent = "add to field";
-          save.disabled = false;
           setOpen(false);
-        }, 450);
+          clearForm();
+        }, 350);
       })
       .catch(() => {
         save.disabled = false;
@@ -332,5 +490,5 @@ export function createCaptureDrawer(
       });
   });
 
-  return shell;
+  return { element: shell, openForCreate, openForEdit };
 }

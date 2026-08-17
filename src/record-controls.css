@@ -1,0 +1,91 @@
+.captured-entry-edit {
+  fill: rgb(23 22 20 / 0%);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: fill 160ms ease;
+}
+
+.captured-entry:hover .captured-entry-edit,
+.captured-entry:focus .captured-entry-edit,
+.captured-entry-edit:focus {
+  fill: rgb(23 22 20 / 42%);
+  outline: none;
+}
+
+.capture-existing-media {
+  display: grid;
+  gap: 7px;
+  margin-top: -8px;
+  padding: 10px 0 2px;
+  border-top: 1px solid rgb(23 22 20 / 10%);
+}
+
+.capture-existing-media[hidden] {
+  display: none;
+}
+
+.capture-existing-media-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  color: rgb(23 22 20 / 58%);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.capture-existing-media-item input {
+  margin-top: 1px;
+  accent-color: #6f6a61;
+}
+
+.capture-delete-area {
+  display: grid;
+  gap: 8px;
+  margin-top: 4px;
+  padding-top: 14px;
+  border-top: 1px solid rgb(164 77 70 / 18%);
+}
+
+.capture-delete-area[hidden] {
+  display: none;
+}
+
+.capture-delete {
+  justify-self: start;
+  border: 0;
+  padding: 4px 0;
+  background: transparent;
+  color: rgb(132 51 46 / 72%);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.capture-delete:hover,
+.capture-delete:focus-visible {
+  color: rgb(132 51 46 / 100%);
+}
+
+.capture-delete:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.capture-delete-notice {
+  color: rgb(132 51 46 / 62%);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .captured-entry-edit {
+    transition: none;
+  }
+}

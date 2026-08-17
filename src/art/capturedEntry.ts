@@ -10,6 +10,10 @@ const SVG_NS = "http://www.w3.org/2000/svg";
 const MEDIA_WORLD_WIDTH = 340;
 const MEDIA_WORLD_HEIGHT = 255;
 
+export type CapturedEntryOptions = {
+  onEdit?: (entry: FieldEntry) => void;
+};
+
 function svgElement<K extends keyof SVGElementTagNameMap>(
   name: K,
   attributes: Record<string, string> = {},
@@ -62,7 +66,10 @@ function readableDate(value: string): string {
   }).format(date);
 }
 
-export function createCapturedEntry(entry: FieldEntry): SVGGElement {
+export function createCapturedEntry(
+  entry: FieldEntry,
+  options: CapturedEntryOptions = {},
+): SVGGElement {
   const position = positionForEntry(entry);
   const group = svgElement("g", {
     class: `captured-entry captured-entry-${entry.visibility}`,
@@ -73,6 +80,7 @@ export function createCapturedEntry(entry: FieldEntry): SVGGElement {
       entry.text ||
       `Captured field entry from ${readableDate(entry.happenedAt)}`,
   });
+  group.dataset.entryId = entry.id;
   group.style.setProperty("--entry-emotion", primaryEmotionColour(entry));
 
   const text = svgElement("text", {
@@ -93,6 +101,30 @@ export function createCapturedEntry(entry: FieldEntry): SVGGElement {
     entry.visibility === "public" ? "" : ` · ${entry.visibility}`;
   meta.textContent = `${readableDate(entry.happenedAt)}${place}${visibility}`;
   group.append(meta);
+
+  if (options.onEdit) {
+    const edit = svgElement("text", {
+      x: "4",
+      y: "62",
+      class: "captured-entry-edit",
+      tabindex: "0",
+      role: "button",
+      "aria-label": "Edit this record",
+    });
+    edit.textContent = "edit";
+    const openEditor = (event: Event): void => {
+      event.preventDefault();
+      event.stopPropagation();
+      options.onEdit?.(entry);
+    };
+    edit.addEventListener("pointerdown", (event) => event.stopPropagation());
+    edit.addEventListener("click", openEditor);
+    edit.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") openEditor(event);
+    });
+    group.append(edit);
+    group.addEventListener("dblclick", openEditor);
+  }
 
   entry.emotions.forEach((emotion, index) => {
     group.append(createFieldEmotionBlob(emotion, index));
