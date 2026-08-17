@@ -16,7 +16,8 @@ function openDatabase(): Promise<IDBDatabase> {
     };
 
     request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error ?? new Error("Could not open field storage"));
+    request.onerror = () =>
+      reject(request.error ?? new Error("Could not open field storage"));
   });
 }
 
@@ -26,8 +27,10 @@ export async function saveEntry(entry: FieldEntry): Promise<void> {
     const transaction = database.transaction(ENTRY_STORE, "readwrite");
     transaction.objectStore(ENTRY_STORE).put(entry);
     transaction.oncomplete = () => resolve();
-    transaction.onerror = () => reject(transaction.error ?? new Error("Could not save entry"));
-    transaction.onabort = () => reject(transaction.error ?? new Error("Saving entry was aborted"));
+    transaction.onerror = () =>
+      reject(transaction.error ?? new Error("Could not save entry"));
+    transaction.onabort = () =>
+      reject(transaction.error ?? new Error("Saving entry was aborted"));
   });
   database.close();
 }
@@ -38,7 +41,8 @@ export async function listEntries(): Promise<FieldEntry[]> {
     const transaction = database.transaction(ENTRY_STORE, "readonly");
     const request = transaction.objectStore(ENTRY_STORE).getAll();
     request.onsuccess = () => resolve(request.result as FieldEntry[]);
-    request.onerror = () => reject(request.error ?? new Error("Could not read entries"));
+    request.onerror = () =>
+      reject(request.error ?? new Error("Could not read entries"));
   });
   database.close();
   return entries.sort((a, b) => a.happenedAt.localeCompare(b.happenedAt));
