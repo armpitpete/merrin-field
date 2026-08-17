@@ -26,7 +26,8 @@ if (!app) throw new Error("Missing #app root");
 const svg = svgElement("svg", {
   class: "field",
   role: "img",
-  "aria-label": "An open typographic field. Drag to move; use the wheel or trackpad to zoom.",
+  "aria-label":
+    "An open typographic field. Drag to move; use the wheel or trackpad to zoom.",
 });
 
 const defs = svgElement("defs");
@@ -137,7 +138,8 @@ function endDrag(event: PointerEvent): void {
   if (draggingPointer !== event.pointerId) return;
   draggingPointer = null;
   svg.classList.remove("is-dragging");
-  if (svg.hasPointerCapture(event.pointerId)) svg.releasePointerCapture(event.pointerId);
+  if (svg.hasPointerCapture(event.pointerId))
+    svg.releasePointerCapture(event.pointerId);
 }
 
 svg.addEventListener("pointerup", endDrag);
