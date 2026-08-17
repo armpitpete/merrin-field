@@ -21,11 +21,18 @@ function svgElement<K extends keyof SVGElementTagNameMap>(
   return element;
 }
 
-function firstMedia(entry: FieldEntry, prefix: string): StoredMedia | undefined {
+function firstMedia(
+  entry: FieldEntry,
+  prefix: string,
+): StoredMedia | undefined {
   return entry.media.find((asset) => asset.type.startsWith(prefix));
 }
 
-function fadeAudio(audio: HTMLAudioElement, target: number, onSilent?: () => void): void {
+function fadeAudio(
+  audio: HTMLAudioElement,
+  target: number,
+  onSilent?: () => void,
+): void {
   const start = audio.volume;
   const started = performance.now();
   const duration = 520;
@@ -62,7 +69,9 @@ export function createCapturedEntry(entry: FieldEntry): SVGGElement {
     transform: `translate(${position.x} ${position.y}) rotate(${position.rotate})`,
     tabindex: "0",
     role: "group",
-    "aria-label": entry.text || `Captured field entry from ${readableDate(entry.happenedAt)}`,
+    "aria-label":
+      entry.text ||
+      `Captured field entry from ${readableDate(entry.happenedAt)}`,
   });
   group.style.setProperty("--entry-emotion", primaryEmotionColour(entry));
 
@@ -80,7 +89,8 @@ export function createCapturedEntry(entry: FieldEntry): SVGGElement {
     class: "captured-entry-meta",
   });
   const place = entry.place ? ` · ${entry.place}` : "";
-  const visibility = entry.visibility === "public" ? "" : ` · ${entry.visibility}`;
+  const visibility =
+    entry.visibility === "public" ? "" : ` · ${entry.visibility}`;
   meta.textContent = `${readableDate(entry.happenedAt)}${place}${visibility}`;
   group.append(meta);
 
@@ -143,7 +153,10 @@ export function createCapturedEntry(entry: FieldEntry): SVGGElement {
   function wake(): void {
     group.classList.add("is-awake");
     if (lingerTimer !== null) window.clearTimeout(lingerTimer);
-    lingerTimer = window.setTimeout(() => group.classList.add("is-lingering"), 1800);
+    lingerTimer = window.setTimeout(
+      () => group.classList.add("is-lingering"),
+      1800,
+    );
 
     if (video) {
       void video.play().catch(() => undefined);
