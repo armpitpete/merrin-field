@@ -1,4 +1,5 @@
 import "./style.css";
+import { createLiveTrace } from "./art/liveTrace";
 import { createTypographicPortrait } from "./art/typographicPortrait";
 import {
   cameraTransform,
@@ -7,9 +8,11 @@ import {
   type Camera,
   type Viewport,
 } from "./world/camera";
+import { createSpatialSound } from "./world/spatialSound";
 import { applyZoomVisibility } from "./world/zoomVisibility";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
+const SOUND_SOURCE = { x: 1200, y: -420 };
 
 function svgElement<K extends keyof SVGElementTagNameMap>(
   name: K,
@@ -29,37 +32,53 @@ const svg = svgElement("svg", {
   class: "field",
   role: "img",
   "aria-label":
-    "An open typographic field. Drag to move; use the wheel or trackpad to zoom.",
+    "An open typographic field. Drag to move; use the wheel or trackpad to zoom. Sound begins after interaction.",
 });
 
 const defs = svgElement("defs");
-const orbit = svgElement("path", {
-  id: "word-orbit",
-  d: "M -620 0 C -520 -430 -170 -570 120 -520 C 430 -470 650 -210 600 90 C 550 390 210 560 -130 520 C -460 480 -690 270 -620 0 Z",
+const drift = svgElement("path", {
+  id: "word-drift",
+  d: "M -1320 -680 C -760 -860 -210 -560 250 -610 C 760 -670 1230 -620 1680 -170",
 });
-defs.append(orbit);
+defs.append(drift);
 svg.append(defs);
 
 const world = svgElement("g", { class: "world" });
 
-const orbitText = svgElement("text", { class: "orbit-text" });
+const landmark = svgElement("text", {
+  x: "-1530",
+  y: "-40",
+  class: "landmark",
+});
+landmark.textContent = "YORK";
+world.append(landmark);
+
+const driftText = svgElement("text", { class: "drift-text" });
 const textPath = svgElement("textPath", {
-  href: "#word-orbit",
-  startOffset: "2%",
+  href: "#word-drift",
+  startOffset: "4%",
 });
 textPath.textContent =
-  "words become image · image becomes memory · memory changes shape · sound occupies distance · ";
-orbitText.append(textPath);
-world.append(orbitText);
+  "words could form imagery · a change moves the page around · someone's personal space · ";
+driftText.append(textPath);
+world.append(driftText);
 
-const centre = svgElement("text", {
-  x: "0",
-  y: "8",
+const name = svgElement("text", {
+  x: "-430",
+  y: "310",
   class: "centre-word",
-  "text-anchor": "middle",
+  "text-anchor": "start",
 });
-centre.textContent = "MERRIN";
-world.append(centre);
+name.textContent = "MERRIN";
+world.append(name);
+
+const date = svgElement("text", {
+  x: "-430",
+  y: "358",
+  class: "life-date",
+});
+date.textContent = "17 August 2026 · evening";
+world.append(date);
 
 const fragments: Array<{
   text: string;
@@ -69,11 +88,37 @@ const fragments: Array<{
   rotate?: number;
   className?: string;
 }> = [
-  { text: "York", x: -980, y: -460, size: 62 },
-  { text: "sound", x: 1120, y: -620, size: 38, rotate: 8 },
-  { text: "memory", x: -1240, y: 760, size: 46, rotate: -11 },
-  { text: "unfinished things", x: 1380, y: 920, size: 28, rotate: 4 },
-  { text: "words", x: 220, y: 1500, size: 86, className: "faint" },
+  {
+    text: "there's no correct answer, it's ART",
+    x: -1220,
+    y: 720,
+    size: 42,
+    rotate: -8,
+    className: "life-fragment strong",
+  },
+  {
+    text: "unfinished things",
+    x: 430,
+    y: 840,
+    size: 30,
+    rotate: 3,
+    className: "life-fragment",
+  },
+  {
+    text: "words could form imagery",
+    x: 40,
+    y: 1380,
+    size: 84,
+    className: "faint",
+  },
+  {
+    text: "memory",
+    x: -1480,
+    y: 1120,
+    size: 46,
+    rotate: -11,
+    className: "life-fragment",
+  },
 ];
 
 for (const fragment of fragments) {
@@ -90,7 +135,24 @@ for (const fragment of fragments) {
   world.append(text);
 }
 
+world.append(createLiveTrace());
 world.append(createTypographicPortrait());
+
+const soundMark = svgElement("g", {
+  class: "sound-source-mark",
+  transform: `translate(${SOUND_SOURCE.x} ${SOUND_SOURCE.y})`,
+});
+const soundWord = svgElement("text", { x: "0", y: "0", class: "sound-word" });
+soundWord.textContent = "sound";
+soundMark.append(soundWord);
+const soundWhisper = svgElement("text", {
+  x: "32",
+  y: "42",
+  class: "sound-whisper",
+});
+soundWhisper.textContent = "come closer";
+soundMark.append(soundWhisper);
+world.append(soundMark);
 
 const farMark = svgElement("text", {
   x: "4600",
@@ -103,9 +165,10 @@ world.append(farMark);
 svg.append(world);
 app.append(svg);
 
-let camera: Camera = { x: 0, y: 0, scale: 0.58 };
+let camera: Camera = { x: 150, y: 100, scale: 0.55 };
 let draggingPointer: number | null = null;
 let previousPointer = { x: 0, y: 0 };
+const spatialSound = createSpatialSound(SOUND_SOURCE);
 
 function viewport(): Viewport {
   return { width: svg.clientWidth, height: svg.clientHeight };
@@ -115,15 +178,21 @@ function render(): void {
   world.setAttribute("transform", cameraTransform(camera, viewport()));
   svg.style.setProperty("--camera-scale", String(camera.scale));
   applyZoomVisibility(world, camera.scale);
+  spatialSound.update(camera);
 }
 
 function home(): void {
-  camera = { x: 0, y: 0, scale: 0.58 };
+  camera = { x: 150, y: 100, scale: 0.55 };
   render();
+}
+
+function wakeSound(): void {
+  void spatialSound.unlock().then(render);
 }
 
 svg.addEventListener("pointerdown", (event) => {
   if (event.button !== 0) return;
+  wakeSound();
   draggingPointer = event.pointerId;
   previousPointer = { x: event.clientX, y: event.clientY };
   svg.setPointerCapture(event.pointerId);
@@ -154,6 +223,7 @@ svg.addEventListener(
   "wheel",
   (event) => {
     event.preventDefault();
+    wakeSound();
     const rect = svg.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
@@ -165,6 +235,7 @@ svg.addEventListener(
 );
 
 window.addEventListener("keydown", (event) => {
+  wakeSound();
   if (event.key === "Home" || event.key === "0") home();
 });
 
