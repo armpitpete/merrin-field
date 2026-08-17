@@ -57,13 +57,17 @@ function ageInDays(happenedAt: string, now: Date): number {
   return Math.max(0, (now.getTime() - happened) / 86_400_000);
 }
 
-export function positionForEntry(entry: FieldEntry, now = new Date()): FieldPosition {
+export function positionForEntry(
+  entry: FieldEntry,
+  now = new Date(),
+): FieldPosition {
   const clusterKey = entry.relationships[0] ?? entry.place ?? entry.id;
   const clusterHash = stableHash(clusterKey);
   const entryHash = stableHash(entry.id);
   const angle = ((clusterHash % 360) * Math.PI) / 180;
   const ageDistance = Math.min(1300, ageInDays(entry.happenedAt, now) * 0.7);
-  const importanceDistance = (100 - Math.max(0, Math.min(100, entry.importance))) * 15;
+  const importanceDistance =
+    (100 - Math.max(0, Math.min(100, entry.importance))) * 15;
   const radius = entry.pinned ? 260 : 320 + ageDistance + importanceDistance;
   const jitterAngle = (((entryHash % 61) - 30) * Math.PI) / 180;
   const jitterRadius = entryHash % 240;
@@ -77,7 +81,9 @@ export function positionForEntry(entry: FieldEntry, now = new Date()): FieldPosi
   };
 }
 
-export function primaryEmotionColour(entry: Pick<FieldEntry, "emotions">): string {
+export function primaryEmotionColour(
+  entry: Pick<FieldEntry, "emotions">,
+): string {
   const emotion = entry.emotions[0];
   return emotion ? EMOTIONAL_COLOURS[emotion] : "#6f6a61";
 }
