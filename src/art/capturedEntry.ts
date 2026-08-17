@@ -3,15 +3,20 @@ import {
   positionForEntry,
   primaryEmotionColour,
   type FieldEntry,
+  type FieldPosition,
   type StoredMedia,
 } from "../field/entry";
+import type { PublicFieldEntry, PublicMedia } from "../field/public";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 const MEDIA_WORLD_WIDTH = 340;
 const MEDIA_WORLD_HEIGHT = 255;
 
+type RenderableEntry = FieldEntry | PublicFieldEntry;
+type RenderableMedia = StoredMedia | PublicMedia;
+
 export type CapturedEntryOptions = {
-  onEdit?: (entry: FieldEntry) => void;
+  onEdit?: () => void;
 };
 
 function svgElement<K extends keyof SVGElementTagNameMap>(
@@ -25,11 +30,19 @@ function svgElement<K extends keyof SVGElementTagNameMap>(
   return element;
 }
 
+function entryPosition(entry: RenderableEntry): FieldPosition {
+  return "position" in entry ? entry.position : positionForEntry(entry);
+}
+
 function firstMedia(
-  entry: FieldEntry,
+  entry: RenderableEntry,
   prefix: string,
-): StoredMedia | undefined {
+): RenderableMedia | undefined {
   return entry.media.find((asset) => asset.type.startsWith(prefix));
+}
+
+function mediaSource(asset: RenderableMedia): string {
+  return "url" in asset ? asset.url : URL.createObjectURL(asset.blob);
 }
 
 function fadeAudio(
@@ -67,10 +80,10 @@ function readableDate(value: string): string {
 }
 
 export function createCapturedEntry(
-  entry: FieldEntry,
+  entry: RenderableEntry,
   options: CapturedEntryOptions = {},
 ): SVGGElement {
-  const position = positionForEntry(entry);
+  const position = entryPosition(entry);
   const group = svgElement("g", {
     class: `captured-entry captured-entry-${entry.visibility}`,
     transform: `translate(${position.x} ${position.y}) rotate(${position.rotate})`,
@@ -115,7 +128,7 @@ export function createCapturedEntry(
     const openEditor = (event: Event): void => {
       event.preventDefault();
       event.stopPropagation();
-      options.onEdit?.(entry);
+      options.onEdit?.();
     };
     edit.addEventListener("pointerdown", (event) => event.stopPropagation());
     edit.addEventListener("click", openEditor);
@@ -151,12 +164,12 @@ export function createCapturedEntry(
 
     if (imageAsset) {
       const image = document.createElement("img");
-      image.src = URL.createObjectURL(imageAsset.blob);
+      image.src = mediaSource(imageAsset);
       image.alt = imageAsset.name;
       visual.append(image);
     } else if (videoAsset) {
       video = document.createElement("video");
-      video.src = URL.createObjectURL(videoAsset.blob);
+      video.src = mediaSource(videoAsset);
       video.preload = "metadata";
       video.loop = true;
       video.muted = true;
@@ -170,7 +183,7 @@ export function createCapturedEntry(
 
   let audio: HTMLAudioElement | null = null;
   if (audioAsset) {
-    audio = new Audio(URL.createObjectURL(audioAsset.blob));
+    audio = new Audio(mediaSource(audioAsset));
     audio.preload = "metadata";
     audio.volume = 0;
   }

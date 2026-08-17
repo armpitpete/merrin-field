@@ -8,7 +8,7 @@ import {
 
 export type CaptureDrawerOptions = {
   onCreate: (entry: FieldEntry) => Promise<void>;
-  onUpdate: (entry: FieldEntry) => Promise<void>;
+  onUpdate: (entry: FieldEntry, previous: FieldEntry) => Promise<void>;
   onDelete: (entry: FieldEntry) => Promise<void>;
 };
 
@@ -40,6 +40,10 @@ function mediaFromFile(file: File): StoredMedia {
     type: file.type || "application/octet-stream",
     blob: file,
   };
+}
+
+function errorMessage(error: unknown, fallback: string): string {
+  return error instanceof Error && error.message ? error.message : fallback;
 }
 
 export function createCaptureDrawer(
@@ -94,7 +98,7 @@ export function createCaptureDrawer(
   const mediaNote = document.createElement("div");
   mediaNote.className = "capture-media-note";
   mediaNote.textContent =
-    "Images and video stay small in the field; sound can wake them on approach.";
+    "Images and video stay small in the field; sound can wake them on approach. Public uploads are limited to 4 MB per record at this gate.";
 
   const recordRow = document.createElement("div");
   recordRow.className = "capture-record-row";
@@ -181,6 +185,9 @@ export function createCaptureDrawer(
   save.type = "submit";
   save.className = "capture-save";
   save.textContent = "add to field";
+  const saveNotice = document.createElement("span");
+  saveNotice.className = "capture-delete-notice";
+  saveNotice.setAttribute("aria-live", "polite");
 
   const deleteArea = document.createElement("div");
   deleteArea.className = "capture-delete-area";
@@ -196,7 +203,7 @@ export function createCaptureDrawer(
   const persistenceNote = document.createElement("p");
   persistenceNote.className = "capture-persistence-note";
   persistenceNote.textContent =
-    "Records and uploads are stored in this browser. Editing or deleting changes that browser copy immediately.";
+    "Private and draft records stay in this browser. Public records are sent to the shared field only after server storage accepts them.";
 
   form.append(
     createLabel("when", happenedAt),
@@ -213,6 +220,7 @@ export function createCaptureDrawer(
     createLabel("visibility", visibility),
     pinLabel,
     save,
+    saveNotice,
     deleteArea,
     persistenceNote,
   );
@@ -287,6 +295,7 @@ export function createCaptureDrawer(
     renderExistingMedia(null);
     resetRecordingState();
     resetDeleteArm();
+    saveNotice.textContent = "";
     title.textContent = "add something";
     save.textContent = "add to field";
     save.disabled = false;
@@ -310,6 +319,7 @@ export function createCaptureDrawer(
     renderExistingMedia(entry);
     resetRecordingState();
     resetDeleteArm();
+    saveNotice.textContent = "";
     title.textContent = "edit record";
     save.textContent = "save changes";
     save.disabled = false;
@@ -404,7 +414,11 @@ export function createCaptureDrawer(
       deleteButton.textContent = "delete permanently";
       const preview =
         editingEntry.text.trim().slice(0, 48) || "untitled record";
-      deleteNotice.textContent = `Will remove “${preview}${editingEntry.text.length > 48 ? "…" : ""}” from this browser.`;
+      const destination =
+        editingEntry.visibility === "public"
+          ? " from this browser and the shared field"
+          : " from this browser";
+      deleteNotice.textContent = `Will remove “${preview}${editingEntry.text.length > 48 ? "…" : ""}”${destination}.`;
       return;
     }
 
@@ -418,17 +432,25 @@ export function createCaptureDrawer(
         clearForm();
         deleteButton.disabled = false;
       })
-      .catch(() => {
+      .catch((error: unknown) => {
         deleteButton.disabled = false;
         deleteButton.textContent = "try delete again";
-        deleteNotice.textContent =
-          "Delete failed; the record is still present.";
+        deleteNotice.textContent = errorMessage(
+          error,
+          "Delete failed; the record is still present.",
+        );
         deleteArmed = true;
       });
   });
 
-  form.addEventListener("input", () => resetDeleteArm());
-  form.addEventListener("change", () => resetDeleteArm());
+  form.addEventListener("input", () => {
+    resetDeleteArm();
+    saveNotice.textContent = "";
+  });
+  form.addEventListener("change", () => {
+    resetDeleteArm();
+    saveNotice.textContent = "";
+  });
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -472,10 +494,14 @@ export function createCaptureDrawer(
       return;
     }
 
-    const updating = Boolean(editingEntry);
+    const previousEntry = editingEntry;
+    const updating = previousEntry !== null;
+    saveNotice.textContent = "";
     save.disabled = true;
     save.textContent = updating ? "saving…" : "adding…";
-    const action = updating ? options.onUpdate(entry) : options.onCreate(entry);
+    const action = previousEntry
+      ? options.onUpdate(entry, previousEntry)
+      : options.onCreate(entry);
     void action
       .then(() => {
         save.textContent = updating ? "saved" : "added";
@@ -484,9 +510,10 @@ export function createCaptureDrawer(
           clearForm();
         }, 350);
       })
-      .catch(() => {
+      .catch((error: unknown) => {
         save.disabled = false;
         save.textContent = "try again";
+        saveNotice.textContent = errorMessage(error, "Save failed.");
       });
   });
 

@@ -2,6 +2,19 @@ import "./style.css";
 import "./emotion-blobs.css";
 import { createCapturedEntry } from "./art/capturedEntry";
 import { createLiveTrace } from "./art/liveTrace";
+import type { FieldEntry } from "./field/entry";
+import type { PublicFieldEntry } from "./field/public";
+import {
+  listPublicEntries,
+  publishEntry,
+  unpublishEntry,
+} from "./field/publicClient";
+import {
+  persistCreatedEntry,
+  persistDeletedEntry,
+  persistUpdatedEntry,
+  type PublicationPersistence,
+} from "./field/publicLifecycle";
 import { deleteEntry, listEntries, saveEntry } from "./field/store";
 import { createCaptureDrawer } from "./ui/captureDrawer";
 import {
@@ -13,7 +26,6 @@ import {
 } from "./world/camera";
 import { createSpatialSound } from "./world/spatialSound";
 import { applyZoomVisibility } from "./world/zoomVisibility";
-import type { FieldEntry } from "./field/entry";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 const EMOTION_BLOB_BASE_SCALE = 0.55;
@@ -147,6 +159,7 @@ world.append(soundAnchor);
 const capturedLayer = svgElement("g", { class: "captured-layer" });
 world.append(capturedLayer);
 const capturedElements = new Map<string, SVGGElement>();
+const localEntryIds = new Set<string>();
 
 // Peripheral real material replaces the generic "there is more out here" cue.
 addText(world, "Lina controlled recolour", 4300, -2550, "far-mark", {
@@ -156,37 +169,66 @@ addText(world, "Lina controlled recolour", 4300, -2550, "far-mark", {
 svg.append(world);
 app.append(svg);
 
-function mountCapturedEntry(entry: FieldEntry): void {
+function mountEntry(
+  entry: FieldEntry | PublicFieldEntry,
+  onEdit?: () => void,
+): void {
   capturedElements.get(entry.id)?.remove();
-  const element = createCapturedEntry(entry, {
-    onEdit: (editable) => captureDrawer.openForEdit(editable),
-  });
+  const element = createCapturedEntry(entry, { onEdit });
   capturedElements.set(entry.id, element);
   capturedLayer.append(element);
 }
 
+function mountLocalEntry(entry: FieldEntry): void {
+  localEntryIds.add(entry.id);
+  mountEntry(entry, () => captureDrawer.openForEdit(entry));
+}
+
+function mountPublicEntry(entry: PublicFieldEntry): void {
+  if (localEntryIds.has(entry.id)) return;
+  mountEntry(entry);
+}
+
+const publicationPersistence: PublicationPersistence = {
+  saveLocal: saveEntry,
+  deleteLocal: deleteEntry,
+  publish: publishEntry,
+  unpublish: unpublishEntry,
+};
+
 const captureDrawer = createCaptureDrawer({
   onCreate: async (entry) => {
-    await saveEntry(entry);
-    mountCapturedEntry(entry);
+    await persistCreatedEntry(entry, publicationPersistence);
+    mountLocalEntry(entry);
   },
-  onUpdate: async (entry) => {
-    await saveEntry(entry);
-    mountCapturedEntry(entry);
+  onUpdate: async (entry, previous) => {
+    await persistUpdatedEntry(entry, previous, publicationPersistence);
+    mountLocalEntry(entry);
   },
   onDelete: async (entry) => {
-    await deleteEntry(entry.id);
+    await persistDeletedEntry(entry, publicationPersistence);
+    localEntryIds.delete(entry.id);
     capturedElements.get(entry.id)?.remove();
     capturedElements.delete(entry.id);
   },
 });
 app.append(captureDrawer.element);
 
-void listEntries()
-  .then((entries) => {
-    for (const entry of entries) mountCapturedEntry(entry);
-  })
-  .catch(() => undefined);
+void (async () => {
+  try {
+    const entries = await listEntries();
+    for (const entry of entries) mountLocalEntry(entry);
+  } catch {
+    // Browser-local capture failure must not prevent the authored field loading.
+  }
+
+  try {
+    const entries = await listPublicEntries();
+    for (const entry of entries) mountPublicEntry(entry);
+  } catch {
+    // Shared storage can be unavailable while private/draft work remains usable.
+  }
+})();
 
 let camera: Camera = { x: 80, y: 110, scale: 0.55 };
 let draggingPointer: number | null = null;
