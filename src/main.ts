@@ -1,6 +1,5 @@
 import "./style.css";
 import { createLiveTrace } from "./art/liveTrace";
-import { createTypographicPortrait } from "./art/typographicPortrait";
 import {
   cameraTransform,
   panByScreenDelta,
@@ -12,7 +11,11 @@ import { createSpatialSound } from "./world/spatialSound";
 import { applyZoomVisibility } from "./world/zoomVisibility";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
-const SOUND_SOURCE = { x: 1200, y: -420 };
+
+// The first sound belongs to the music-working-note region rather than to a
+// generic decorative marker. It remains procedural until a real recording is
+// available, but its position now has biographical meaning.
+const SOUND_SOURCE = { x: -760, y: 690 };
 
 function svgElement<K extends keyof SVGElementTagNameMap>(
   name: K,
@@ -25,6 +28,30 @@ function svgElement<K extends keyof SVGElementTagNameMap>(
   return element;
 }
 
+function addText(
+  parent: SVGGElement,
+  text: string,
+  x: number,
+  y: number,
+  className: string,
+  options: { rotate?: number; size?: number } = {},
+): SVGTextElement {
+  const attributes: Record<string, string> = {
+    x: String(x),
+    y: String(y),
+    class: className,
+  };
+  if (options.size) attributes["font-size"] = String(options.size);
+  if (options.rotate) {
+    attributes.transform = `rotate(${options.rotate} ${x} ${y})`;
+  }
+
+  const element = svgElement("text", attributes);
+  element.textContent = text;
+  parent.append(element);
+  return element;
+}
+
 const app = document.querySelector<HTMLElement>("#app");
 if (!app) throw new Error("Missing #app root");
 
@@ -32,140 +59,92 @@ const svg = svgElement("svg", {
   class: "field",
   role: "img",
   "aria-label":
-    "An open typographic field. Drag to move; use the wheel or trackpad to zoom. Sound begins after interaction.",
+    "An open field of dated working fragments. Drag to move; use the wheel or trackpad to zoom. Sound begins after interaction.",
 });
-
-const defs = svgElement("defs");
-const drift = svgElement("path", {
-  id: "word-drift",
-  d: "M -1320 -680 C -760 -860 -210 -560 250 -610 C 760 -670 1230 -620 1680 -170",
-});
-defs.append(drift);
-svg.append(defs);
 
 const world = svgElement("g", { class: "world" });
 
-const landmark = svgElement("text", {
-  x: "-1530",
-  y: "-40",
-  class: "landmark",
+// Geography, not a heading.
+addText(world, "YORK", -1590, -60, "landmark");
+
+// Identity is present, but not posed as a logo.
+addText(world, "MERRIN", -360, 280, "centre-word");
+addText(world, "17 August 2026 · evening", -360, 328, "life-date");
+
+// A real working-note cluster from today. These are not arranged to depict a
+// generic object: their geometry comes only from proximity and emphasis.
+const music = svgElement("g", {
+  class: "working-region music-region",
+  transform: "translate(-1030 620) rotate(-5)",
+  "aria-label": "Music working notes from 17 August 2026",
 });
-landmark.textContent = "YORK";
-world.append(landmark);
+const musicNote =
+  "notes are overlapping, it sounds like an old hymn, emotionless";
+const rhythmNote = "the rhythm needs improvement";
+const barNote =
+  "1 bar could be 1 whole note · 2 half notes · 4 quarter notes · …";
+const strongNote = "working-note working-note-strong";
+const smallNote = "working-note working-note-small";
 
-const driftText = svgElement("text", { class: "drift-text" });
-const textPath = svgElement("textPath", {
-  href: "#word-drift",
-  startOffset: "4%",
+addText(music, musicNote, 0, 0, strongNote, { size: 42 });
+addText(music, rhythmNote, 155, 86, "working-note", {
+  size: 28,
+  rotate: 2,
 });
-textPath.textContent =
-  "words could form imagery · a change moves the page around · someone's personal space · ";
-driftText.append(textPath);
-world.append(driftText);
-
-const name = svgElement("text", {
-  x: "-430",
-  y: "310",
-  class: "centre-word",
-  "text-anchor": "start",
+addText(music, barNote, 38, 142, smallNote, { size: 20, rotate: -1 });
+addText(music, "Invariant Predictive Music", -42, 205, "working-label", {
+  size: 15,
 });
-name.textContent = "MERRIN";
-world.append(name);
+world.append(music);
 
-const date = svgElement("text", {
-  x: "-430",
-  y: "358",
-  class: "life-date",
+// Other things occupying the same day, allowed to remain separate rather than
+// being forced into a symbolic portrait.
+const language = svgElement("g", {
+  class: "working-region",
+  transform: "translate(470 -150) rotate(3)",
+  "aria-label": "Vaelinya working fragment",
 });
-date.textContent = "17 August 2026 · evening";
-world.append(date);
+addText(language, "A Day Trip to Vaelinya", 0, 0, "working-note", { size: 31 });
+addText(language, "Arrival", 74, 48, "working-label", { size: 16 });
+world.append(language);
 
-const fragments: Array<{
-  text: string;
-  x: number;
-  y: number;
-  size: number;
-  rotate?: number;
-  className?: string;
-}> = [
-  {
-    text: "there's no correct answer, it's ART",
-    x: -1220,
-    y: 720,
-    size: 42,
-    rotate: -8,
-    className: "life-fragment strong",
-  },
-  {
-    text: "unfinished things",
-    x: 430,
-    y: 840,
-    size: 30,
-    rotate: 3,
-    className: "life-fragment",
-  },
-  {
-    text: "words could form imagery",
-    x: 40,
-    y: 1380,
-    size: 84,
-    className: "faint",
-  },
-  {
-    text: "memory",
-    x: -1480,
-    y: 1120,
-    size: 46,
-    rotate: -11,
-    className: "life-fragment",
-  },
-];
+const evidence = svgElement("g", {
+  class: "working-region",
+  transform: "translate(720 820) rotate(7)",
+  "aria-label": "Evidence work fragment",
+});
+const ledgerNote =
+  "party-claimed amount → official amount → accounting state → origin → overlap → strict eligibility";
+const faintSmallNote = "working-note working-note-small working-note-faint";
 
-for (const fragment of fragments) {
-  const text = svgElement("text", {
-    x: String(fragment.x),
-    y: String(fragment.y),
-    class: `fragment${fragment.className ? ` ${fragment.className}` : ""}`,
-    "font-size": String(fragment.size),
-    transform: fragment.rotate
-      ? `rotate(${fragment.rotate} ${fragment.x} ${fragment.y})`
-      : "",
-  });
-  text.textContent = fragment.text;
-  world.append(text);
-}
+addText(evidence, "Reform's arithmetic", 0, 0, "working-note", { size: 27 });
+addText(evidence, ledgerNote, 28, 54, faintSmallNote, { size: 17 });
+world.append(evidence);
 
+// The prior state remains as memory, but it is not mistaken for documentary
+// life material. It sits lower and quieter than the living fragments.
 world.append(createLiveTrace());
-world.append(createTypographicPortrait());
 
-const soundMark = svgElement("g", {
-  class: "sound-source-mark",
-  transform: `translate(${SOUND_SOURCE.x} ${SOUND_SOURCE.y})`,
+// No visible "sound" instruction: the source is spatially attached to the
+// music note above and should be discovered through movement.
+const soundAnchor = svgElement("circle", {
+  cx: String(SOUND_SOURCE.x),
+  cy: String(SOUND_SOURCE.y),
+  r: "5",
+  class: "sound-anchor",
+  "aria-hidden": "true",
 });
-const soundWord = svgElement("text", { x: "0", y: "0", class: "sound-word" });
-soundWord.textContent = "sound";
-soundMark.append(soundWord);
-const soundWhisper = svgElement("text", {
-  x: "32",
-  y: "42",
-  class: "sound-whisper",
-});
-soundWhisper.textContent = "come closer";
-soundMark.append(soundWhisper);
-world.append(soundMark);
+world.append(soundAnchor);
 
-const farMark = svgElement("text", {
-  x: "4600",
-  y: "-2800",
-  class: "far-mark",
+// Peripheral real material replaces the generic "there is more out here" cue.
+addText(world, "Lina controlled recolour", 4300, -2550, "far-mark", {
+  rotate: -4,
 });
-farMark.textContent = "there is more out here";
-world.append(farMark);
 
 svg.append(world);
 app.append(svg);
 
-let camera: Camera = { x: 150, y: 100, scale: 0.55 };
+let camera: Camera = { x: 80, y: 110, scale: 0.55 };
 let draggingPointer: number | null = null;
 let previousPointer = { x: 0, y: 0 };
 const spatialSound = createSpatialSound(SOUND_SOURCE);
@@ -182,7 +161,7 @@ function render(): void {
 }
 
 function home(): void {
-  camera = { x: 150, y: 100, scale: 0.55 };
+  camera = { x: 80, y: 110, scale: 0.55 };
   render();
 }
 
@@ -212,8 +191,9 @@ function endDrag(event: PointerEvent): void {
   if (draggingPointer !== event.pointerId) return;
   draggingPointer = null;
   svg.classList.remove("is-dragging");
-  if (svg.hasPointerCapture(event.pointerId))
+  if (svg.hasPointerCapture(event.pointerId)) {
     svg.releasePointerCapture(event.pointerId);
+  }
 }
 
 svg.addEventListener("pointerup", endDrag);

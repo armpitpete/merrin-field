@@ -53,134 +53,82 @@ body {
 }
 
 .centre-word {
-  fill: rgb(23 22 20 / 74%);
+  fill: rgb(23 22 20 / 70%);
   font-family: Arial, Helvetica, sans-serif;
-  font-size: 27px;
+  font-size: 25px;
   font-weight: 600;
   letter-spacing: 0.36em;
 }
 
 .life-date {
-  fill: rgb(23 22 20 / 43%);
-  font-size: 22px;
+  fill: rgb(23 22 20 / 38%);
+  font-size: 21px;
   font-style: italic;
   letter-spacing: 0.035em;
 }
 
-.drift-text {
-  fill: rgb(23 22 20 / 45%);
-  font-size: 27px;
-  letter-spacing: 0.055em;
+.working-region {
+  pointer-events: none;
 }
 
-.fragment {
-  fill: rgb(23 22 20 / 68%);
+.working-note {
+  fill: rgb(23 22 20 / 64%);
   font-style: italic;
 }
 
-.fragment.life-fragment {
-  fill: rgb(23 22 20 / 58%);
+.working-note-strong {
+  fill: rgb(23 22 20 / 88%);
 }
 
-.fragment.life-fragment.strong {
-  fill: rgb(23 22 20 / 84%);
+.working-note-small {
+  font-family: Arial, Helvetica, sans-serif;
+  font-style: normal;
+  letter-spacing: 0.025em;
 }
 
-.fragment.faint {
-  fill: rgb(23 22 20 / 10%);
-  letter-spacing: 0.11em;
+.working-note-faint {
+  fill: rgb(23 22 20 / 34%);
+}
+
+.working-label {
+  fill: rgb(23 22 20 / 34%);
+  font-family: Arial, Helvetica, sans-serif;
+  font-style: normal;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
 }
 
 .live-trace {
-  opacity: 0.62;
+  opacity: 0.48;
 }
 
 .live-trace-image {
-  opacity: 0.19;
+  opacity: 0.13;
   filter: grayscale(1) contrast(0.82);
   mix-blend-mode: multiply;
 }
 
 .live-trace-caption {
-  fill: rgb(23 22 20 / 36%);
+  fill: rgb(23 22 20 / 27%);
   font-family: Arial, Helvetica, sans-serif;
   font-size: 18px;
   letter-spacing: 0.065em;
 }
 
-.typographic-portrait {
-  color: #171614;
-}
-
-.portrait-far,
-.portrait-near {
-  transition: opacity 140ms linear;
-}
-
-.portrait-outline {
-  fill: rgb(23 22 20 / 78%);
-  font-size: 35px;
-  letter-spacing: 0.04em;
-}
-
-.portrait-feature {
-  fill: rgb(23 22 20 / 82%);
-  font-size: 28px;
-  letter-spacing: 0.025em;
-}
-
-.portrait-feature-strong {
-  fill: rgb(23 22 20 / 96%);
-  font-weight: 600;
-}
-
-.portrait-feature-small {
-  font-size: 22px;
-}
-
-.portrait-hair {
-  fill: rgb(23 22 20 / 31%);
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 23px;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-}
-
-.portrait-near-fragment {
-  fill: rgb(23 22 20 / 88%);
-  font-size: 18px;
-  letter-spacing: 0.018em;
-}
-
-.sound-source-mark {
+.sound-anchor {
+  fill: rgb(23 22 20 / 7%);
   pointer-events: none;
 }
 
-.sound-word {
-  fill: rgb(23 22 20 / 72%);
-  font-size: 32px;
-  font-style: italic;
-  transform: rotate(7deg);
-}
-
-.sound-whisper {
-  fill: rgb(23 22 20 / 24%);
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 15px;
-  letter-spacing: 0.12em;
-}
-
 .far-mark {
-  fill: rgb(23 22 20 / 38%);
+  fill: rgb(23 22 20 / 31%);
   font-family: Arial, Helvetica, sans-serif;
   font-size: 24px;
   letter-spacing: 0.12em;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .world,
-  .portrait-far,
-  .portrait-near {
+  .world {
     transition: none;
   }
 }
