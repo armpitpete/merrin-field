@@ -78,38 +78,23 @@ const music = svgElement("g", {
   transform: "translate(-1030 620) rotate(-5)",
   "aria-label": "Music working notes from 17 August 2026",
 });
-addText(
-  music,
-  "notes are overlapping, it sounds like an old hymn, emotionless",
-  0,
-  0,
-  "working-note working-note-strong",
-  { size: 42 },
-);
-addText(
-  music,
-  "the rhythm needs improvement",
-  155,
-  86,
-  "working-note",
-  { size: 28, rotate: 2 },
-);
-addText(
-  music,
-  "1 bar could be 1 whole note · 2 half notes · 4 quarter notes · …",
-  38,
-  142,
-  "working-note working-note-small",
-  { size: 20, rotate: -1 },
-);
-addText(
-  music,
-  "Invariant Predictive Music",
-  -42,
-  205,
-  "working-label",
-  { size: 15 },
-);
+const musicNote =
+  "notes are overlapping, it sounds like an old hymn, emotionless";
+const rhythmNote = "the rhythm needs improvement";
+const barNote =
+  "1 bar could be 1 whole note · 2 half notes · 4 quarter notes · …";
+const strongNote = "working-note working-note-strong";
+const smallNote = "working-note working-note-small";
+
+addText(music, musicNote, 0, 0, strongNote, { size: 42 });
+addText(music, rhythmNote, 155, 86, "working-note", {
+  size: 28,
+  rotate: 2,
+});
+addText(music, barNote, 38, 142, smallNote, { size: 20, rotate: -1 });
+addText(music, "Invariant Predictive Music", -42, 205, "working-label", {
+  size: 15,
+});
 world.append(music);
 
 // Other things occupying the same day, allowed to remain separate rather than
@@ -119,9 +104,7 @@ const language = svgElement("g", {
   transform: "translate(470 -150) rotate(3)",
   "aria-label": "Vaelinya working fragment",
 });
-addText(language, "A Day Trip to Vaelinya", 0, 0, "working-note", {
-  size: 31,
-});
+addText(language, "A Day Trip to Vaelinya", 0, 0, "working-note", { size: 31 });
 addText(language, "Arrival", 74, 48, "working-label", { size: 16 });
 world.append(language);
 
@@ -130,15 +113,12 @@ const evidence = svgElement("g", {
   transform: "translate(720 820) rotate(7)",
   "aria-label": "Evidence work fragment",
 });
+const ledgerNote =
+  "party-claimed amount → official amount → accounting state → origin → overlap → strict eligibility";
+const faintSmallNote = "working-note working-note-small working-note-faint";
+
 addText(evidence, "Reform's arithmetic", 0, 0, "working-note", { size: 27 });
-addText(
-  evidence,
-  "party-claimed amount → official amount → accounting state → origin → overlap → strict eligibility",
-  28,
-  54,
-  "working-note working-note-small working-note-faint",
-  { size: 17 },
-);
+addText(evidence, ledgerNote, 28, 54, faintSmallNote, { size: 17 });
 world.append(evidence);
 
 // The prior state remains as memory, but it is not mistaken for documentary
