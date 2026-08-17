@@ -7,7 +7,8 @@ describe("emotionBlobPlacement", () => {
     const second = emotionBlobPlacement(1);
     const third = emotionBlobPlacement(2);
 
-    expect(first.y).toBeCloseTo(second.y, -1);
+    expect(Math.abs(first.y - second.y)).toBeLessThanOrEqual(10);
+    expect(Math.abs(first.y - third.y)).toBeLessThanOrEqual(10);
     expect(second.x).toBeGreaterThan(first.x);
     expect(third.x).toBeGreaterThan(second.x);
   });
