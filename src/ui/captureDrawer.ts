@@ -402,7 +402,8 @@ export function createCaptureDrawer(
     if (!deleteArmed) {
       deleteArmed = true;
       deleteButton.textContent = "delete permanently";
-      const preview = editingEntry.text.trim().slice(0, 48) || "untitled record";
+      const preview =
+        editingEntry.text.trim().slice(0, 48) || "untitled record";
       deleteNotice.textContent = `Will remove “${preview}${editingEntry.text.length > 48 ? "…" : ""}” from this browser.`;
       return;
     }
@@ -420,7 +421,8 @@ export function createCaptureDrawer(
       .catch(() => {
         deleteButton.disabled = false;
         deleteButton.textContent = "try delete again";
-        deleteNotice.textContent = "Delete failed; the record is still present.";
+        deleteNotice.textContent =
+          "Delete failed; the record is still present.";
         deleteArmed = true;
       });
   });
