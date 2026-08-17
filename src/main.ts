@@ -9,6 +9,12 @@ import {
   publishEntry,
   unpublishEntry,
 } from "./field/publicClient";
+import {
+  persistCreatedEntry,
+  persistDeletedEntry,
+  persistUpdatedEntry,
+  type PublicationPersistence,
+} from "./field/publicLifecycle";
 import { deleteEntry, listEntries, saveEntry } from "./field/store";
 import { createCaptureDrawer } from "./ui/captureDrawer";
 import {
@@ -183,24 +189,24 @@ function mountPublicEntry(entry: PublicFieldEntry): void {
   mountEntry(entry);
 }
 
+const publicationPersistence: PublicationPersistence = {
+  saveLocal: saveEntry,
+  deleteLocal: deleteEntry,
+  publish: publishEntry,
+  unpublish: unpublishEntry,
+};
+
 const captureDrawer = createCaptureDrawer({
   onCreate: async (entry) => {
-    if (entry.visibility === "public") await publishEntry(entry);
-    await saveEntry(entry);
+    await persistCreatedEntry(entry, publicationPersistence);
     mountLocalEntry(entry);
   },
   onUpdate: async (entry, previous) => {
-    if (entry.visibility === "public") {
-      await publishEntry(entry);
-    } else if (previous.visibility === "public") {
-      await unpublishEntry(entry.id);
-    }
-    await saveEntry(entry);
+    await persistUpdatedEntry(entry, previous, publicationPersistence);
     mountLocalEntry(entry);
   },
   onDelete: async (entry) => {
-    if (entry.visibility === "public") await unpublishEntry(entry.id);
-    await deleteEntry(entry.id);
+    await persistDeletedEntry(entry, publicationPersistence);
     localEntryIds.delete(entry.id);
     capturedElements.get(entry.id)?.remove();
     capturedElements.delete(entry.id);
