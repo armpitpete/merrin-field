@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "format": "prettier --check .",
+    "format": "prettier --write . && git diff --exit-code",
     "format:write": "prettier --write ."
   },
   "devDependencies": {
