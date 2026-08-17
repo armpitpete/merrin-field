@@ -1,5 +1,8 @@
 import "./style.css";
+import { createCapturedEntry } from "./art/capturedEntry";
 import { createLiveTrace } from "./art/liveTrace";
+import { listEntries, saveEntry } from "./field/store";
+import { createCaptureDrawer } from "./ui/captureDrawer";
 import {
   cameraTransform,
   panByScreenDelta,
@@ -136,6 +139,11 @@ const soundAnchor = svgElement("circle", {
 });
 world.append(soundAnchor);
 
+// Captures are a separate living layer. The entry contains life data; its
+// current position and media behaviour are only today's interpretation.
+const capturedLayer = svgElement("g", { class: "captured-layer" });
+world.append(capturedLayer);
+
 // Peripheral real material replaces the generic "there is more out here" cue.
 addText(world, "Lina controlled recolour", 4300, -2550, "far-mark", {
   rotate: -4,
@@ -143,6 +151,20 @@ addText(world, "Lina controlled recolour", 4300, -2550, "far-mark", {
 
 svg.append(world);
 app.append(svg);
+
+const captureDrawer = createCaptureDrawer({
+  onCreate: async (entry) => {
+    await saveEntry(entry);
+    capturedLayer.append(createCapturedEntry(entry));
+  },
+});
+app.append(captureDrawer);
+
+void listEntries()
+  .then((entries) => {
+    for (const entry of entries) capturedLayer.append(createCapturedEntry(entry));
+  })
+  .catch(() => undefined);
 
 let camera: Camera = { x: 80, y: 110, scale: 0.55 };
 let draggingPointer: number | null = null;
@@ -215,6 +237,13 @@ svg.addEventListener(
 );
 
 window.addEventListener("keydown", (event) => {
+  const target = event.target;
+  const typing =
+    target instanceof HTMLInputElement ||
+    target instanceof HTMLTextAreaElement ||
+    target instanceof HTMLSelectElement;
+  if (typing) return;
+
   wakeSound();
   if (event.key === "Home" || event.key === "0") home();
 });
