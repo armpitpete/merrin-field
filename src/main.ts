@@ -1,4 +1,5 @@
 import "./style.css";
+import "./emotion-blobs.css";
 import { createCapturedEntry } from "./art/capturedEntry";
 import { createLiveTrace } from "./art/liveTrace";
 import { listEntries, saveEntry } from "./field/store";
