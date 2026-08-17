@@ -15,6 +15,7 @@ import { createSpatialSound } from "./world/spatialSound";
 import { applyZoomVisibility } from "./world/zoomVisibility";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
+const EMOTION_BLOB_BASE_SCALE = 0.55;
 
 // The first sound belongs to the music-working-note region rather than to a
 // generic decorative marker. It remains procedural until a real recording is
@@ -180,6 +181,10 @@ function viewport(): Viewport {
 function render(): void {
   world.setAttribute("transform", cameraTransform(camera, viewport()));
   svg.style.setProperty("--camera-scale", String(camera.scale));
+  svg.style.setProperty(
+    "--emotion-screen-scale",
+    String(Math.max(1, EMOTION_BLOB_BASE_SCALE / camera.scale)),
+  );
   applyZoomVisibility(world, camera.scale);
   spatialSound.update(camera);
 }
