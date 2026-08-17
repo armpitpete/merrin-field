@@ -68,6 +68,50 @@ body {
   letter-spacing: 0.18em;
 }
 
+.typographic-portrait {
+  color: #171614;
+}
+
+.portrait-far,
+.portrait-near {
+  transition: opacity 140ms linear;
+}
+
+.portrait-outline {
+  fill: rgb(23 22 20 / 78%);
+  font-size: 34px;
+  letter-spacing: 0.045em;
+}
+
+.portrait-feature {
+  fill: rgb(23 22 20 / 82%);
+  font-size: 28px;
+  letter-spacing: 0.025em;
+}
+
+.portrait-feature-strong {
+  fill: rgb(23 22 20 / 96%);
+  font-weight: 600;
+}
+
+.portrait-feature-small {
+  font-size: 22px;
+}
+
+.portrait-hair {
+  fill: rgb(23 22 20 / 31%);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 23px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.portrait-near-fragment {
+  fill: rgb(23 22 20 / 88%);
+  font-size: 18px;
+  letter-spacing: 0.018em;
+}
+
 .far-mark {
   fill: rgb(23 22 20 / 38%);
   font-family: Arial, Helvetica, sans-serif;
@@ -76,7 +120,9 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .world {
+  .world,
+  .portrait-far,
+  .portrait-near {
     transition: none;
   }
 }
