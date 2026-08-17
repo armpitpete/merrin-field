@@ -25,9 +25,7 @@ describe("presenceForSource", () => {
 
 describe("panForSource", () => {
   it("places a source to the right when it is east of the camera", () => {
-    expect(panForSource({ x: 0, y: 0, scale: 1 }, source)).toBeGreaterThan(
-      0,
-    );
+    expect(panForSource({ x: 0, y: 0, scale: 1 }, source)).toBeGreaterThan(0);
   });
 
   it("clamps stereo position", () => {
