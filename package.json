@@ -12,6 +12,9 @@
     "format": "prettier --check .",
     "format:write": "prettier --write ."
   },
+  "dependencies": {
+    "@vercel/blob": "2.6.1"
+  },
   "devDependencies": {
     "fake-indexeddb": "6.2.5",
     "prettier": "3.9.6",
