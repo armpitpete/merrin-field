@@ -33,11 +33,7 @@ function isObject(value: unknown): value is JsonObject {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function stringValue(
-  object: JsonObject,
-  key: string,
-  maximum: number,
-): string {
+function stringValue(object: JsonObject, key: string, maximum: number): string {
   const value = object[key];
   if (typeof value !== "string" || value.length > maximum) {
     throw new InputError(`Invalid ${key}.`);
@@ -90,7 +86,8 @@ function parseDraft(value: unknown): PublicFieldEntryDraft {
     if (seenMedia.has(mediaId)) throw new InputError("Duplicate media id.");
     seenMedia.add(mediaId);
     const type = stringValue(asset, "type", 256);
-    if (!allowedMediaType(type)) throw new InputError("Unsupported media type.");
+    if (!allowedMediaType(type))
+      throw new InputError("Unsupported media type.");
     return { id: mediaId, type };
   });
 
@@ -222,7 +219,8 @@ async function authorised(request: Request): Promise<boolean> {
 async function publish(request: Request): Promise<PublicFieldEntry> {
   const form = await request.formData();
   const rawEntry = form.get("entry");
-  if (typeof rawEntry !== "string") throw new InputError("Missing public record.");
+  if (typeof rawEntry !== "string")
+    throw new InputError("Missing public record.");
 
   let parsed: unknown;
   try {
@@ -246,7 +244,8 @@ async function publish(request: Request): Promise<PublicFieldEntry> {
       throw new InputError("Public media exceeds the 4 MB record limit.");
     }
     const type = part.type || descriptor.type;
-    if (!allowedMediaType(type)) throw new InputError("Unsupported media type.");
+    if (!allowedMediaType(type))
+      throw new InputError("Unsupported media type.");
 
     const blob = await put(`${mediaPrefix(draft.id)}${descriptor.id}`, part, {
       access: "public",
@@ -299,7 +298,10 @@ export default {
       }
 
       if (!(await authorised(request))) {
-        return Response.json({ error: "Publisher key was rejected." }, { status: 401 });
+        return Response.json(
+          { error: "Publisher key was rejected." },
+          { status: 401 },
+        );
       }
 
       if (request.method === "PUT") {
