@@ -50,6 +50,10 @@ Connect a Vercel Blob store to the Merrin Field project. `@vercel/blob` then use
 
 If Blob storage is missing or unavailable, `/api/field` returns a service-unavailable response. Browser-local private/draft work remains usable.
 
+### TypeScript compatibility pin
+
+The project is deliberately pinned to TypeScript 6.0.3 for this gate. During M0.4 validation, Vercel successfully deployed the same minimal Function as JavaScript and as TypeScript 6.0.3, but failed when the project used TypeScript 7.0.2. Do not upgrade the TypeScript pin until a preview containing `api/field.ts` passes Vercel again.
+
 ## Current media limit
 
 M0.4 sends public media through the server function and therefore caps public media at 4 MB total per record. Larger files must remain private/draft for now.
