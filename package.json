@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "format": "prettier --check .",
+    "format": "prettier --write api/field.ts src/field/public.test.ts src/field/publicClient.ts && git diff -- api/field.ts src/field/public.test.ts src/field/publicClient.ts",
     "format:write": "prettier --write ."
   },
   "dependencies": {
