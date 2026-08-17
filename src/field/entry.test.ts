@@ -38,17 +38,23 @@ describe("positionForEntry", () => {
   });
 
   it("lets pinned material override ordinary distance", () => {
-    const pinned = positionForEntry(entry({ importance: 10, pinned: true }), now);
-    const ordinary = positionForEntry(entry({ importance: 10, pinned: false }), now);
+    const pinned = positionForEntry(
+      entry({ importance: 10, pinned: true }),
+      now,
+    );
+    const ordinary = positionForEntry(
+      entry({ importance: 10, pinned: false }),
+      now,
+    );
     expect(distance(pinned)).toBeLessThan(distance(ordinary));
   });
 });
 
 describe("primaryEmotionColour", () => {
   it("uses the first selected emotional colour as the local accent", () => {
-    expect(primaryEmotionColour(entry({ emotions: ["tenderness", "curiosity"] }))).toBe(
-      EMOTIONAL_COLOURS.tenderness,
-    );
+    expect(
+      primaryEmotionColour(entry({ emotions: ["tenderness", "curiosity"] })),
+    ).toBe(EMOTIONAL_COLOURS.tenderness);
   });
 
   it("falls back to a neutral accent when no emotion is tagged", () => {
