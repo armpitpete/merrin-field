@@ -1,5 +1,5 @@
+import { createFieldEmotionBlob, emotionBlobRows } from "./fieldEmotionBlob";
 import {
-  EMOTIONAL_COLOURS,
   positionForEntry,
   primaryEmotionColour,
   type FieldEntry,
@@ -95,14 +95,7 @@ export function createCapturedEntry(entry: FieldEntry): SVGGElement {
   group.append(meta);
 
   entry.emotions.forEach((emotion, index) => {
-    const dot = svgElement("circle", {
-      cx: String(6 + index * 18),
-      cy: "58",
-      r: "5",
-      class: "captured-emotion-dot",
-    });
-    dot.style.setProperty("--emotion-colour", EMOTIONAL_COLOURS[emotion]);
-    group.append(dot);
+    group.append(createFieldEmotionBlob(emotion, index));
   });
 
   const imageAsset = firstMedia(entry, "image/");
@@ -112,9 +105,11 @@ export function createCapturedEntry(entry: FieldEntry): SVGGElement {
 
   const visualAsset = imageAsset ?? videoAsset;
   if (visualAsset) {
+    const rows = emotionBlobRows(entry.emotions.length);
+    const visualY = rows > 0 ? 200 + (rows - 1) * 152 : 78;
     const foreignObject = svgElement("foreignObject", {
       x: "24",
-      y: "78",
+      y: String(visualY),
       width: String(MEDIA_WORLD_WIDTH),
       height: String(MEDIA_WORLD_HEIGHT),
       class: "captured-visual-wrap",
