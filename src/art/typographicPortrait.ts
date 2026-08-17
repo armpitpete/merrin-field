@@ -114,7 +114,12 @@ export function createTypographicPortrait(): SVGGElement {
   );
 
   const hairLines = [
-    [-330, -365, -9, "unfinished music unfinished language unfinished questions"],
+    [
+      -330,
+      -365,
+      -9,
+      "unfinished music unfinished language unfinished questions",
+    ],
     [-360, -310, -7, "not opened a website not opened a website"],
     [-375, -252, -5, "words images sound typography time"],
     [-386, -194, -3, "what happens next what happens next what happens next"],
@@ -142,7 +147,12 @@ export function createTypographicPortrait(): SVGGElement {
     [-275, 30, -6, "A change moves the page around."],
     [-250, 78, -3, "There's no correct answer, it's ART."],
     [-215, 126, 1, "Words could form imagery."],
-    [-150, 300, 7, "Open it and feel that you have entered someone's personal space."],
+    [
+      -150,
+      300,
+      7,
+      "Open it and feel that you have entered someone's personal space.",
+    ],
   ] as const;
 
   for (const [x, y, rotate, words] of nearFragments) {
