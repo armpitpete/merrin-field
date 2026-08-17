@@ -1,4 +1,5 @@
 import "./style.css";
+import { createTypographicPortrait } from "./art/typographicPortrait";
 import {
   cameraTransform,
   panByScreenDelta,
@@ -6,6 +7,7 @@ import {
   type Camera,
   type Viewport,
 } from "./world/camera";
+import { applyZoomVisibility } from "./world/zoomVisibility";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 
@@ -88,6 +90,8 @@ for (const fragment of fragments) {
   world.append(text);
 }
 
+world.append(createTypographicPortrait());
+
 const farMark = svgElement("text", {
   x: "4600",
   y: "-2800",
@@ -110,6 +114,7 @@ function viewport(): Viewport {
 function render(): void {
   world.setAttribute("transform", cameraTransform(camera, viewport()));
   svg.style.setProperty("--camera-scale", String(camera.scale));
+  applyZoomVisibility(world, camera.scale);
 }
 
 function home(): void {
