@@ -38,8 +38,8 @@ function addTextPath(
 export function createTypographicPortrait(): SVGGElement {
   const portrait = svgElement("g", {
     class: "typographic-portrait",
-    transform: "translate(1840 -120)",
-    "aria-label": "A face drawn from words",
+    transform: "translate(1400 -170)",
+    "aria-label": "A face drawn from Merrin's words",
   });
 
   const defs = svgElement("defs");
@@ -78,14 +78,14 @@ export function createTypographicPortrait(): SVGGElement {
   addTextPath(
     far,
     "portrait-head",
-    "I keep making systems because the world rarely arrives as one · words become image · image becomes memory · a life changes shape · ",
+    "words could form imagery · a change moves the page around · there's no correct answer, it's ART · ",
     "portrait-outline",
     "1%",
   );
   addTextPath(
     far,
     "portrait-brow",
-    "attention attention attention attention",
+    "someone's personal space someone's personal space",
     "portrait-feature portrait-feature-strong",
   );
   addTextPath(
@@ -97,7 +97,7 @@ export function createTypographicPortrait(): SVGGElement {
   addTextPath(
     far,
     "portrait-nose",
-    "follow the thought until it changes",
+    "the page moves when the life moves",
     "portrait-feature portrait-feature-small",
   );
   addTextPath(
@@ -114,14 +114,9 @@ export function createTypographicPortrait(): SVGGElement {
   );
 
   const hairLines = [
-    [
-      -330,
-      -365,
-      -9,
-      "unfinished music unfinished language unfinished questions",
-    ],
-    [-360, -310, -7, "making making making making making making"],
-    [-375, -252, -5, "systems stories sound type memory place"],
+    [-330, -365, -9, "unfinished music unfinished language unfinished questions"],
+    [-360, -310, -7, "not opened a website not opened a website"],
+    [-375, -252, -5, "words images sound typography time"],
     [-386, -194, -3, "what happens next what happens next what happens next"],
   ] as const;
 
@@ -144,10 +139,10 @@ export function createTypographicPortrait(): SVGGElement {
   });
 
   const nearFragments = [
-    [-275, 30, -6, "A change moves the page."],
-    [-250, 78, -3, "There is no correct arrangement."],
-    [-215, 126, 1, "Words can form imagery."],
-    [-150, 300, 7, "The software enables composition."],
+    [-275, 30, -6, "A change moves the page around."],
+    [-250, 78, -3, "There's no correct answer, it's ART."],
+    [-215, 126, 1, "Words could form imagery."],
+    [-150, 300, 7, "Open it and feel that you have entered someone's personal space."],
   ] as const;
 
   for (const [x, y, rotate, words] of nearFragments) {
