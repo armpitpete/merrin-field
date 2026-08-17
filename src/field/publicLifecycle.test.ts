@@ -49,7 +49,9 @@ describe("publication lifecycle", () => {
   it("rolls back a new public write when the browser copy fails", async () => {
     const actions = persistence();
     const publicEntry = entry({ visibility: "public" });
-    vi.mocked(actions.saveLocal).mockRejectedValueOnce(new Error("disk failed"));
+    vi.mocked(actions.saveLocal).mockRejectedValueOnce(
+      new Error("disk failed"),
+    );
 
     await expect(persistCreatedEntry(publicEntry, actions)).rejects.toThrow(
       "Nothing new remains published",
@@ -63,7 +65,9 @@ describe("publication lifecycle", () => {
     const actions = persistence();
     const previous = entry({ visibility: "public", text: "old public" });
     const updated = entry({ visibility: "public", text: "new public" });
-    vi.mocked(actions.saveLocal).mockRejectedValueOnce(new Error("disk failed"));
+    vi.mocked(actions.saveLocal).mockRejectedValueOnce(
+      new Error("disk failed"),
+    );
 
     await expect(
       persistUpdatedEntry(updated, previous, actions),
