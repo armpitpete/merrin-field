@@ -1,8 +1,5 @@
 import type { FieldEntry } from "./entry";
-import {
-  toPublicFieldEntryDraft,
-  type PublicFieldEntry,
-} from "./public";
+import { toPublicFieldEntryDraft, type PublicFieldEntry } from "./public";
 
 const PUBLISHER_KEY_SESSION = "merrin-field-publisher-key";
 const PUBLIC_UPLOAD_LIMIT_BYTES = 4_000_000;
@@ -39,7 +36,10 @@ function forgetPublisherKey(): void {
 }
 
 function assertPublicUploadSize(entry: FieldEntry): void {
-  const totalBytes = entry.media.reduce((sum, asset) => sum + asset.blob.size, 0);
+  const totalBytes = entry.media.reduce(
+    (sum, asset) => sum + asset.blob.size,
+    0,
+  );
   if (totalBytes > PUBLIC_UPLOAD_LIMIT_BYTES) {
     throw new Error(
       "Public uploads are currently limited to 4 MB per record. Keep this record private/draft or reduce the upload size.",
