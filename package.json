@@ -13,6 +13,7 @@
     "format:write": "prettier --write ."
   },
   "devDependencies": {
+    "fake-indexeddb": "6.2.5",
     "prettier": "3.9.6",
     "typescript": "7.0.2",
     "vite": "8.2.0",
