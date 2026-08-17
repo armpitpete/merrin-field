@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "format": "prettier --write src/ui/captureDrawer.ts && git diff -- src/ui/captureDrawer.ts && exit 1",
+    "format": "prettier --check .",
     "format:write": "prettier --write ."
   },
   "devDependencies": {
