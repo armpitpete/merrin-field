@@ -34,7 +34,9 @@ function mediaFromFile(file: File): StoredMedia {
   };
 }
 
-export function createCaptureDrawer(options: CaptureDrawerOptions): HTMLElement {
+export function createCaptureDrawer(
+  options: CaptureDrawerOptions,
+): HTMLElement {
   const shell = document.createElement("div");
   shell.className = "capture-shell";
 
@@ -69,7 +71,8 @@ export function createCaptureDrawer(options: CaptureDrawerOptions): HTMLElement 
 
   const text = document.createElement("textarea");
   text.rows = 6;
-  text.placeholder = "What happened, what are you thinking, what should remain?";
+  text.placeholder =
+    "What happened, what are you thinking, what should remain?";
 
   const media = document.createElement("input");
   media.type = "file";
@@ -78,7 +81,8 @@ export function createCaptureDrawer(options: CaptureDrawerOptions): HTMLElement 
 
   const mediaNote = document.createElement("div");
   mediaNote.className = "capture-media-note";
-  mediaNote.textContent = "Images and video stay small in the field; sound can wake them on approach.";
+  mediaNote.textContent =
+    "Images and video stay small in the field; sound can wake them on approach.";
 
   const recordRow = document.createElement("div");
   recordRow.className = "capture-record-row";
@@ -96,7 +100,8 @@ export function createCaptureDrawer(options: CaptureDrawerOptions): HTMLElement 
 
   const whyNow = document.createElement("textarea");
   whyNow.rows = 2;
-  whyNow.placeholder = "Optional; composition metadata, not necessarily public.";
+  whyNow.placeholder =
+    "Optional; composition metadata, not necessarily public.";
 
   const relationships = document.createElement("input");
   relationships.type = "text";
@@ -116,7 +121,11 @@ export function createCaptureDrawer(options: CaptureDrawerOptions): HTMLElement 
   importanceWrap.append(importance, peripheral, central);
 
   const visibility = document.createElement("select");
-  for (const value of ["private", "public", "draft"] satisfies EntryVisibility[]) {
+  for (const value of [
+    "private",
+    "public",
+    "draft",
+  ] satisfies EntryVisibility[]) {
     const option = document.createElement("option");
     option.value = value;
     option.textContent = value;
@@ -127,7 +136,10 @@ export function createCaptureDrawer(options: CaptureDrawerOptions): HTMLElement 
   pinned.type = "checkbox";
   const pinLabel = document.createElement("label");
   pinLabel.className = "capture-inline-check";
-  pinLabel.append(pinned, document.createTextNode(" keep near the present centre"));
+  pinLabel.append(
+    pinned,
+    document.createTextNode(" keep near the present centre"),
+  );
 
   const emotions = document.createElement("fieldset");
   emotions.className = "capture-emotions";
@@ -199,7 +211,10 @@ export function createCaptureDrawer(options: CaptureDrawerOptions): HTMLElement 
       return;
     }
 
-    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+    if (
+      !navigator.mediaDevices?.getUserMedia ||
+      typeof MediaRecorder === "undefined"
+    ) {
       recordState.textContent = "recording is not available in this browser";
       return;
     }
@@ -243,19 +258,25 @@ export function createCaptureDrawer(options: CaptureDrawerOptions): HTMLElement 
     if (open) text.focus();
   }
 
-  toggle.addEventListener("click", () => setOpen(!shell.classList.contains("is-open")));
+  toggle.addEventListener("click", () =>
+    setOpen(!shell.classList.contains("is-open")),
+  );
   close.addEventListener("click", () => setOpen(false));
 
   window.addEventListener("keydown", (event) => {
     if (event.key === "Escape") setOpen(false);
     const target = event.target;
-    const typing = target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement;
+    const typing =
+      target instanceof HTMLInputElement ||
+      target instanceof HTMLTextAreaElement;
     if (!typing && event.key.toLowerCase() === "c") setOpen(true);
   });
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
-    const happenedDate = happenedAt.value ? new Date(happenedAt.value) : new Date();
+    const happenedDate = happenedAt.value
+      ? new Date(happenedAt.value)
+      : new Date();
     const selectedFiles = Array.from(media.files ?? []).map(mediaFromFile);
     const selectedEmotions = Array.from(emotionInputs.entries())
       .filter(([, input]) => input.checked)
