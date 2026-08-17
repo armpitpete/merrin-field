@@ -59,7 +59,11 @@ describe("public field projection", () => {
     expect(projection).not.toHaveProperty("createdAt");
     expect(projection.media[0]).not.toHaveProperty("name");
     expect(JSON.stringify(projection)).not.toContain("private-filename.jpg");
-    expect(JSON.stringify(projection)).not.toContain("private relationship name");
-    expect(JSON.stringify(projection)).not.toContain("private composition note");
+    expect(JSON.stringify(projection)).not.toContain(
+      "private relationship name",
+    );
+    expect(JSON.stringify(projection)).not.toContain(
+      "private composition note",
+    );
   });
 });
