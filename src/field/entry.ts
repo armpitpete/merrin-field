@@ -24,6 +24,7 @@ export type StoredMedia = {
 export type FieldEntry = {
   id: string;
   createdAt: string;
+  updatedAt?: string;
   happenedAt: string;
   text: string;
   whyNow: string;
