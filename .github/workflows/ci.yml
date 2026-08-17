@@ -35,3 +35,9 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Reproduce Vercel build
+        env:
+          VERCEL_ORG_ID: team_hmoIpIprPeTID1hH2OlXmKMT
+          VERCEL_PROJECT_ID: prj_1XIXv3HZztkQPWqirK3zhF5dJSwN
+        run: npx --yes vercel@latest build --yes
