@@ -122,10 +122,20 @@ export function createTypographicPortrait(): SVGGElement {
   );
 
   const hairLines = [
-    [-330, -365, -9, "unfinished music unfinished language unfinished questions"],
+    [
+      -330,
+      -365,
+      -9,
+      "unfinished music unfinished language unfinished questions",
+    ],
     [-360, -310, -7, "making making making making making making"],
     [-375, -252, -5, "systems stories sound type memory place"],
-    [-386, -194, -3, "what happens next what happens next what happens next"],
+    [
+      -386,
+      -194,
+      -3,
+      "what happens next what happens next what happens next",
+    ],
   ] as const;
 
   for (const [x, y, rotate, words] of hairLines) {
